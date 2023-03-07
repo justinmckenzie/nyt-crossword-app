@@ -1,8 +1,10 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
-import Home from '../views/Home.vue'
-import ShoppingList from '../views/ShoppingList.vue'
+import { createRouter, createWebHashHistory } from 'vue-router';
 
-const router = createRouter({
+// Views
+import Home from '../views/Home.vue'
+import Leaderboard from '../views/Leaderboard.vue'
+
+export default createRouter({
   history: createWebHashHistory(),
   routes: [
     {
@@ -13,7 +15,7 @@ const router = createRouter({
     {
       path: '/leaderboard',
       name: 'leaderboard',
-      component: ShoppingList
+      component: Leaderboard
     },
     {
       path: "/:catchAll(.*)", // Unrecognized path automatically matches 404
@@ -22,5 +24,3 @@ const router = createRouter({
   ],
   linkActiveClass: 'active',
 });
-
-export default router;
