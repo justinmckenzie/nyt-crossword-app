@@ -94,7 +94,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 0 0 8px 0px; 
+        border-radius: 0 0 8px 0px;
         font-family: 'Montserrat-Bold';
       }
 

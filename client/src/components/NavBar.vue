@@ -3,7 +3,8 @@
 		<h1>NYT Crossword Stats</h1>
 		<nav>
 			<router-link to="/" class="nav-link" exact>Home</router-link>
-			<router-link to="/leaderboard" class="nav-link" exact>Leaderboard</router-link>
+			<router-link to="/leaderboard" class="nav-link" exact>Head-To-Head</router-link>
+			<router-link to="/leaderboard-averages" class="nav-link" exact>Mini Averages</router-link>
 		</nav>
   </header>
 </template>
