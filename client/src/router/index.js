@@ -1,8 +1,9 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 
 // Views
-import Home from '../views/Home.vue'
-import Leaderboard from '../views/Leaderboard.vue'
+import Home from '../views/Home.vue';
+import Leaderboard from '../views/Leaderboard.vue';
+import LeaderboardAverages from '../views/LeaderboardAverages';
 
 export default createRouter({
   history: createWebHashHistory(),
@@ -16,6 +17,11 @@ export default createRouter({
       path: '/leaderboard',
       name: 'leaderboard',
       component: Leaderboard
+    },
+    {
+      path: '/leaderboard-averages',
+      name: 'leaderboard averages',
+      component: LeaderboardAverages
     },
     {
       path: "/:catchAll(.*)", // Unrecognized path automatically matches 404

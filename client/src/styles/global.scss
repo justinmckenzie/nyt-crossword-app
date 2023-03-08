@@ -15,6 +15,10 @@ html, body {
   color: $PRIMARY_900;
 }
 
+body, #app {
+  height: calc(100vh - 105px); // TODO: revist this. might need to look up how to size body with fixed header
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Montserrat-Bold';
 }

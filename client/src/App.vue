@@ -26,6 +26,7 @@
     margin-right: auto;
     margin-left: auto;
     margin-top: 90px;
+    height: 100%;
 
     @media (max-width: $BREAKPOINT_MD) {
       padding: 48px 32px;

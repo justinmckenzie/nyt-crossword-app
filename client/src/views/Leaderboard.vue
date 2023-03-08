@@ -1,12 +1,14 @@
 <template>
   <section>
-    <h2>Leader Board</h2>
+    <h2>Head-To-Head Leaderboard</h2>
     <DatePicker
       v-model="selectedDate"
       :max-date='new Date()'
-      @dayclick="fetchData($event.id)"
+      @dayclick="onCalendarSelection($event)"
       :popover="{ visibility: 'click' }"
       id="date-selector-container"
+      color="purple"
+      :select-attribute="{ dot: true }"
     >
       <template v-slot="{ inputValue, inputEvents }">
         <label for="date-input">
@@ -22,28 +24,42 @@
     </DatePicker>
     <ul id="leaderboard-options">
       <li v-for="option in leaderboardOptions" :key="option.id">
-        <button type="button" class="leaderboard-btn" @click="onPuzzleSelection(option.id)">{{ option.title }}</button>
+        <button
+          type="button"
+          class="leaderboard-btn"
+          v-bind:class="{ 'active': selectedLeaderboard === option.id }"
+          @click="onPuzzleSelection(option.id)"
+        >
+          {{ option.title }}
+        </button>
       </li>
     </ul>
     <ul id="leaderboard-rankings">
-      <li
-        v-for="person, index in leaderboardData"
-        :key="person.name"
-        class="ranking-container"
-      >
-        <RankingWidget
-          :name="person.name"
-          :place="index + 1"
-          :time="new Date(person[selectedLeaderboard].timeElapsed * 1000).toISOString().substring(14, 19)"
-          :timeDesc="getTimeDesc(person[selectedLeaderboard].completed, person[selectedLeaderboard].startedAt)"
-          :metadata="{
-            // TODO: need to add in logic for showing only if it's been completed
-            startedAt: person[selectedLeaderboard].startedAt ? new Date(person[selectedLeaderboard].startedAt * 1000).toLocaleString() : 'Not Started',
-            finishedAt: person[selectedLeaderboard].solvedAt ? new Date(person[selectedLeaderboard].solvedAt * 1000).toLocaleString() : 'Not Completed',
-            usedAutocomplete: person[selectedLeaderboard].usedAutoComplete,
-          }"
-        />
-      </li>
+      <template v-if="isLoading">
+        <div class="loading-container">
+          <FontAwesomeIcon class="loading-spinner" icon="fa-solid fa-spinner" />
+          <p>Crunching the numbers...</p>
+        </div>
+      </template>
+      <template v-else>
+        <li
+          v-for="person, index in leaderboardData"
+          :key="person.name"
+          class="ranking-container"
+        >
+          <RankingWidget
+            :name="person.name"
+            :place="index + 1"
+            :time="new Date(person[selectedLeaderboard].timeElapsed * 1000).toISOString().substring(14, 19)"
+            :timeDesc="getTimeDesc(person[selectedLeaderboard].completed, person[selectedLeaderboard].startedAt)"
+            :metadata="{
+              startedAt: person[selectedLeaderboard].startedAt ? new Date(person[selectedLeaderboard].startedAt * 1000).toLocaleString() : 'Not Started',
+              finishedAt: person[selectedLeaderboard].solvedAt ? new Date(person[selectedLeaderboard].solvedAt * 1000).toLocaleString() : 'Not Completed',
+              usedAutocomplete: person[selectedLeaderboard].usedAutoComplete,
+            }"
+          />
+        </li>
+      </template>
     </ul>
   </section>
 </template>
@@ -54,9 +70,7 @@
   import RankingWidget from '@/components/RankingWidget.vue'
   import { LEADERBOARD_OPTIONS } from '@/utils/constants';
 
-  function formatInitDate() {
-    const date = new Date();
-
+  function formatInitDate(date) {
     const year = date.toLocaleString('default', { year: 'numeric' });
     const month = date.toLocaleString('default', { month: '2-digit' });
     const day = date.toLocaleString('default', { day: '2-digit' });
@@ -65,29 +79,28 @@
   }
 
   // TODOS:
-  // Calendar initial date is wrong
-  // Prevent req or click event on a disabled date
-  // Colors for Calendar (active selection, etc)
-  // Loading placeholder
-  // Active state for selected option
+  // Overall app styling with heights, etc.
   export default {
     name: 'Leaderboard',
     data() {
       return {
-        selectedDate: formatInitDate(),
+        selectedDate: new Date(),
         leaderboardOptions: LEADERBOARD_OPTIONS,
         selectedLeaderboard: LEADERBOARD_OPTIONS[0].id,
         leaderboardData: [],
+        isLoading: false,
       };
     },
     created: function () {
-      this.fetchData(this.selectedDate);
+      this.fetchData(formatInitDate(this.selectedDate));
     },
     methods: {
       fetchData: async function (date) {
-        const data = await fetch(`http://localhost:5000/leaderboard?date=${date}`);
+        this.isLoading = true;
+        const data = await fetch(`http://localhost:5000/leaderboard-single?date=${date}`);
         const { leaderboard } = await data.json();
         console.log("response data", leaderboard);
+        this.isLoading = false;
         return this.leaderboardData = this.sortLeaderboard(leaderboard);
       },
       sortLeaderboard: function (data) {
@@ -98,9 +111,17 @@
           return a[`${this.selectedLeaderboard}`].timeElapsed - b[`${this.selectedLeaderboard}`].timeElapsed;
         });
       },
-      onPuzzleSelection: function (selectedOption) {
+      onPuzzleSelection(selectedOption) {
         this.selectedLeaderboard = selectedOption;
         this.leaderboardData = this.sortLeaderboard(this.leaderboardData);
+      },
+      onCalendarSelection(selection) {
+        // DatePicker component still fires selection events on disabled (future) days
+        if (selection?.isDisabled) {
+          return;
+        }
+
+        return this.fetchData(selection.id);
       },
       getTimeDesc(completion, startTime) {
         if (completion) {
@@ -121,6 +142,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 100%;
 
     h2 {
       font-size: 32px;
@@ -162,27 +184,61 @@
 
       .leaderboard-btn {
         outline: none;
-        border: none;
         margin: 0 24px; // TODO: revisit this
         text-transform: uppercase;
         font-family: 'Montserrat-Bold';
         padding: 12px 24px;
         border-radius: 4px;
-        color: $WHITE;
         letter-spacing: 0.5px;
-        background-color: $PRIMARY_500;
         transition: ease-in-out 0.3s;
-
+        background-color: transparent;
+        color: $PRIMARY_900;
+        border: 1px solid $PRIMARY_900;
+        
         &:hover {
           cursor: pointer;
           background-color: $PRIMARY_300;
-          color: $PRIMARY_900;
+          border: 1px solid $PRIMARY_300;
+        }
+
+        &.active {
+          background-color: $PRIMARY_500;
+          color: $WHITE;
+          border: 1px solid transparent;
+
+          &:hover {
+            cursor: initial;
+          }
         }
       }
     }
 
     #leaderboard-rankings {
       width: 50%;
+      height: 100%;
+
+      .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+
+        svg {
+          height: 32px;
+          width: 32px;
+          margin-bottom: 24px;
+          animation-name: spin;
+          animation-duration: 2000ms;
+          animation-iteration-count: infinite;
+          animation-timing-function: linear;
+        }
+      }
     }
+  }
+
+  @keyframes spin {
+    from {transform:rotate(0deg);}
+    to {transform:rotate(360deg);}
   }
 </style>
