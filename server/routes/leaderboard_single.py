@@ -62,9 +62,11 @@ def leaderboard_single():
     }
 
   response_dict = {
-    'status': 'success',
+    'status': 'success', # TODO: add failure/error handling
     'message': '',
+    # TODO: change this field to "data"
     'leaderboard': users, #TODO: remove user_id and user_cookie from response
   }
   
+  # TODO proper returning of data to mirror what FE expects
   return jsonify(response_dict)
