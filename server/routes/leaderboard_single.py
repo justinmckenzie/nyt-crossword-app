@@ -3,7 +3,7 @@ from app import app
 import requests
 from datetime import datetime, timedelta
 
-@app.route('/leaderboard-single', methods=['GET'])
+@app.route('/api/leaderboard-single', methods=['GET'])
 def leaderboard_single():
   API_ROOT = 'https://nyt-games-prd.appspot.com/svc/crosswords/v2/'
 

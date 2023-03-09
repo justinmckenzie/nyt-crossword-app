@@ -46,7 +46,7 @@
           this.errorMsg = '';
         }
         this.loading = true;
-        const { data, message, status } = await fetcher('/leaderboard-averages');
+        const { data, message, status } = await fetcher('/api/leaderboard-averages');
         this.loading = false;
 
         // TODO: constants

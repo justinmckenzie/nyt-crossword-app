@@ -94,7 +94,7 @@
           this.errorMsg = '';
         }
         this.loading = true;
-        const { data, message, status } = await fetcher(`/leaderboard-single?date=${date}`);
+        const { data, message, status } = await fetcher(`/api/leaderboard-single?date=${date}`);
         this.loading = false;
 
         // TODO: constants

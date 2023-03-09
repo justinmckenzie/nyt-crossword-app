@@ -2,7 +2,7 @@ from flask import jsonify, request
 from app import app
 import requests
 
-@app.route('/leaderboard-averages', methods=['GET'])
+@app.route('/api/leaderboard-averages', methods=['GET'])
 def leaderboard_averages():
   # TODO: POC will just get the last 31 days (limit), will eventually move onto being able to take in date ranges
   users = [
