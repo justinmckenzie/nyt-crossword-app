@@ -19,21 +19,22 @@
   }
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
   #app-container {
     max-width: $BREAKPOINT_XXL;
-    padding: 64px 48px;
-    margin-right: auto;
-    margin-left: auto;
-    margin-top: 90px;
-    height: 100%;
+    padding: 32px 16px;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex: 1;
 
-    @media (max-width: $BREAKPOINT_MD) {
+    @media (min-width: $BREAKPOINT_SM) {
       padding: 48px 32px;
     }
 
-    @media (max-width: $BREAKPOINT_SM) {
-      padding: 32px 16px;
+    @media (min-width: $BREAKPOINT_MD) {
+      padding: 64px 48px;
     }
   }
 </style>

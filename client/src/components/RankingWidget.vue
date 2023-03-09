@@ -1,5 +1,5 @@
 <template>
-  <div class="ranking">
+  <li class="ranking">
     <div class="ranking__data">
       <div class="ranking__data_place">{{ place }}</div>
       <span class="ranking__data_name">{{ name }}</span>
@@ -34,7 +34,7 @@
         <p>Autocomplete Used? {{ metadata.usedAutoComplete ? 'Yes' : 'No' }}</p>
       </div>
     </transition>
-  </div>
+  </li>
 </template>
 
 <script>
@@ -67,6 +67,7 @@
 </script>
 
 <style scoped lang="scss">
+  // TODO: more css touch up on these (later on)
   .ranking {
     margin-top: 24px;
     position: relative;
