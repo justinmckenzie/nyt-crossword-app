@@ -25,8 +25,9 @@
 </template>
 
 <script>
-import fetcher from "../utils/fetcher";
+import fetcher from "@/utils/fetcher";
 import Overlays from "@/components/Overlays.vue";
+import { HTTP_STATUS } from "@/utils/constants";
 
 export default {
   name: "Leaderboard",
@@ -53,8 +54,7 @@ export default {
       );
       this.loading = false;
 
-      // TODO: constants
-      if (status !== "success") {
+      if (status !== HTTP_STATUS.SUCCESS) {
         this.error = true;
         this.errorMsg = message;
         return (this.data = []);
@@ -63,7 +63,6 @@ export default {
       return (this.data = this.sortLeaderboard(data));
     },
     sortLeaderboard: function (data) {
-      console.log("data", data);
       const lbData = data;
       return lbData.sort((a, b) => {
         if (a["data"].average === 0) return 1;
@@ -107,11 +106,10 @@ section {
       flex-direction: column;
       align-items: center;
       text-align: center;
-      border: 1px solid $PRIMARY_100;
-      box-shadow: 0px 4px 10px -4px rgba(0, 30, 43, 0.3);
       border-radius: 24px;
       padding: 32px;
       margin-top: 16px;
+      @include card-border;
 
       .name {
         font-size: 16px;

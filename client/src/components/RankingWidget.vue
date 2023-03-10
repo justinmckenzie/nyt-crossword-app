@@ -68,12 +68,11 @@ export default {
 .ranking {
   margin-top: 24px;
   position: relative;
-  border: 1px solid $PRIMARY_100;
-  box-shadow: 0px 4px 10px -4px rgba(0, 30, 43, 0.3);
   padding: 32px 24px 16px;
   border-radius: 24px;
   overflow: hidden;
   width: 100%;
+  @include card-border;
 
   &__data {
     display: flex;
@@ -89,9 +88,7 @@ export default {
       left: 0;
       height: 24px;
       width: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      @include flex-center;
       border-radius: 0 0 8px 0px;
       font-family: "Montserrat-Bold";
     }

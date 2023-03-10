@@ -17,14 +17,11 @@
 <style scoped lang="scss">
 header {
   width: 100%;
-  display: flex;
+  @include flex-center;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   padding: 16px 24px;
-  border: 1px solid $PRIMARY_100;
   border-radius: 0 0 8px 8px;
-  box-shadow: 0px 4px 10px -4px rgba(0, 30, 43, 0.3);
+  @include card-border;
 
   a {
     text-decoration: none;

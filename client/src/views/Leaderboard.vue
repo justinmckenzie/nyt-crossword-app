@@ -76,7 +76,7 @@ import { DatePicker } from "v-calendar";
 
 import RankingWidget from "@/components/RankingWidget.vue";
 import Overlays from "@/components/Overlays.vue";
-import { LEADERBOARD_OPTIONS } from "@/utils/constants";
+import { LEADERBOARD_OPTIONS, HTTP_STATUS } from "@/utils/constants";
 import fetcher from "@/utils/fetcher";
 
 function formatInitDate(date) {
@@ -117,8 +117,7 @@ export default {
       );
       this.loading = false;
 
-      // TODO: constants
-      if (status !== "success") {
+      if (status !== HTTP_STATUS.SUCCESS) {
         this.error = true;
         this.errorMsg = message;
         return (this.leaderboardData = []);
@@ -128,7 +127,6 @@ export default {
     },
     sortLeaderboard: function (data) {
       const lbData = data;
-      console.log("data", lbData);
       return lbData.sort((a, b) => {
         if (a[`${this.selectedLeaderboard}`].timeElapsed === 0) return 1;
         if (b[`${this.selectedLeaderboard}`].timeElapsed === 0) return -1;

@@ -1,7 +1,10 @@
 <template>
   <footer>
     <p>{{ new Date().getFullYear() }} <span>&copy; By Justin McKenzie</span></p>
-    <a href="https://github.com/justinmckenzie/nyt-crossword-stats">
+    <a
+      target="_blank"
+      href="https://github.com/justinmckenzie/nyt-crossword-stats"
+    >
       <FontAwesomeIcon icon="fa-brands fa-github" />
     </a>
   </footer>
