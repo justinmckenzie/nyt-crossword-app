@@ -1,7 +1,6 @@
 export default async function fetcher(url) {
   try {
-    // TODO: remove when integrated
-    const req = fetch(`${url}`);
+    const req = fetch(url);
     const res = await (await req).json();
 
     if (res.status === 'success') {
