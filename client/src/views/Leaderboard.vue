@@ -93,6 +93,8 @@
         if (this.errorMsg) {
           this.errorMsg = '';
         }
+        // TODO: better way to do this?
+        this.leaderboardData = [];
         this.loading = true;
         const { data, message, status } = await fetcher(`/api/leaderboard-single?date=${date}`);
         this.loading = false;
