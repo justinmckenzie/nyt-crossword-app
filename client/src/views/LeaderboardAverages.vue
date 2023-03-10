@@ -2,40 +2,38 @@
   <section>
     <h2>Leader Board Averages - Mini Only</h2>
     <p class="subtitle">(Data pulled from the last 31 days)</p>
-    <template v-if="isLoading">
-      <div class="loading-container">
-        <FontAwesomeIcon class="loading-spinner" icon="fa-solid fa-spinner" />
-        <p>Crunching the numbers...</p>
-      </div>
-    </template>
-    <template v-else>
-      <ul class="averages-results">
-        <li
-          v-for="person in data"
-          :key="person.name"
-        >
-          <div class="result-container">
-            <p class="name">{{ person.name }}</p>
-            <span class="average">{{ new Date(person.data.average * 1000).toISOString().substring(14, 19) }}</span>
-            <div class="result-metadata">
-              <p>Puzzles Completed: {{ person.data.completed }}</p>
-              <p>In Progress: {{ person.data.in_progress }}</p>
-              <p>Not Started: {{ person.data.not_started }}</p>
-            </div>
+    <ul class="averages-results">
+      <Overlays :error="{ status: error, message: errorMsg }" :loading="{ status: loading, message: 'Crunching the numbers...' }" />
+      <li
+        v-for="person in data"
+        :key="person.name"
+      >
+        <div class="result-container">
+          <p class="name">{{ person.name }}</p>
+          <span class="average">{{ new Date(person.data.average * 1000).toISOString().substring(14, 19) }}</span>
+          <div class="result-metadata">
+            <p>Puzzles Completed: {{ person.data.completed }}</p>
+            <p>In Progress: {{ person.data.in_progress }}</p>
+            <p>Not Started: {{ person.data.not_started }}</p>
           </div>
-        </li>
-      </ul>
-    </template>
+        </div>
+      </li>
+    </ul>
   </section>
 </template>
 
 <script>
+  import fetcher from '../utils/fetcher';
+  import Overlays from '@/components/Overlays.vue';
+
   export default {
     name: 'Leaderboard',
     data() {
       return {
         data: [],
-        isLoading: false,
+        loading: false,
+        error: false,
+        errorMsg: '',
       };
     },
     created: function () {
@@ -43,10 +41,21 @@
     },
     methods: {
       fetchData: async function () {
-        this.isLoading = true;
-        const req = await fetch(`http://localhost:5000/leaderboard-averages`);
-        const { data } = await req.json();
-        this.isLoading = false;
+        // clear existing error if present
+        if (this.errorMsg) {
+          this.errorMsg = '';
+        }
+        this.loading = true;
+        const { data, message, status } = await fetcher('/api/leaderboard-averages');
+        this.loading = false;
+
+        // TODO: constants
+        if (status !== 'success') {
+          this.error = true;
+          this.errorMsg = message;
+          return this.data = [];
+        }
+
         return this.data = this.sortLeaderboard(data);
       },
       sortLeaderboard: function (data) {
@@ -59,7 +68,8 @@
         });
       }
     },
-};
+    components: { Overlays },
+ };
 </script>
 
 <style scoped lang="scss">
@@ -67,10 +77,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 100%;
+    flex: 1;
 
     h2 {
-      font-size: 32px;
+      font-size: 24px;
+      text-align: center;
     }
 
     .subtitle {
@@ -83,7 +94,10 @@
 
     .averages-results {
       display: flex;
-      margin-top: 24px;
+      flex-direction: column;
+      margin-top: 16px;
+      flex: 1;
+
       .result-container {
         display: flex;
         flex-direction: column;
@@ -93,17 +107,17 @@
         box-shadow: 0px 4px 10px -4px rgba(0, 30, 43, 0.3);
         border-radius: 24px;
         padding: 32px;
-        margin: 0 16px;
+        margin-top: 16px;
 
         .name {
-          font-size: 20px;
+          font-size: 16px;
         }
 
         .average {
-          font-size: 48px;
+          font-size: 32px;
           font-family: 'Montserrat-Bold';
           color: $PRIMARY_600;
-          margin: 16px 0;
+          margin: 8px 0;
         }
 
         .result-metadata {
@@ -116,27 +130,28 @@
       }
     }
 
-    .loading-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
+    @media (min-width: $BREAKPOINT_MD) {
+      h2 {
+        font-size: 32px;
+      }
 
-      svg {
-        height: 32px;
-        width: 32px;
-        margin-bottom: 24px;
-        animation-name: spin;
-        animation-duration: 2000ms;
-        animation-iteration-count: infinite;
-        animation-timing-function: linear;
+      .averages-results {
+        flex-direction: row;
+        margin-top: 24px;
+
+        .result-container {
+          margin: 0 16px;
+
+          .name {
+            font-size: 20px;
+          }
+
+          .average {
+            font-size: 48px;
+            margin: 16px 0;
+          }
+        }
       }
     }
-  }
-
-  @keyframes spin {
-    from {transform:rotate(0deg);}
-    to {transform:rotate(360deg);}
   }
 </style>

@@ -2,23 +2,25 @@
   <section>
     <h2>Head-To-Head Leaderboard</h2>
     <DatePicker
+      color="purple"
       v-model="selectedDate"
       :max-date='new Date()'
-      @dayclick="onCalendarSelection($event)"
-      :popover="{ visibility: 'click' }"
-      id="date-selector-container"
-      color="purple"
       :select-attribute="{ dot: true }"
+      :popover="{ visibility: 'click' }"
+      @dayclick="onCalendarSelection($event)"
+      id="date-selector-container"
     >
       <template v-slot="{ inputValue, inputEvents }">
         <label for="date-input">
           Show Results For:
-          <input
+          <div class="input-container">
+            <input
             id="date-input"
             :value="inputValue"
             v-on="inputEvents"
-          />
-          <FontAwesomeIcon icon="fa-solid fa-calendar-days" />
+            />
+            <FontAwesomeIcon icon="fa-solid fa-calendar-days" />
+          </div>
         </label>
       </template>
     </DatePicker>
@@ -35,31 +37,20 @@
       </li>
     </ul>
     <ul id="leaderboard-rankings">
-      <template v-if="isLoading">
-        <div class="loading-container">
-          <FontAwesomeIcon class="loading-spinner" icon="fa-solid fa-spinner" />
-          <p>Crunching the numbers...</p>
-        </div>
-      </template>
-      <template v-else>
-        <li
-          v-for="person, index in leaderboardData"
-          :key="person.name"
-          class="ranking-container"
-        >
-          <RankingWidget
-            :name="person.name"
-            :place="index + 1"
-            :time="new Date(person[selectedLeaderboard].timeElapsed * 1000).toISOString().substring(14, 19)"
-            :timeDesc="getTimeDesc(person[selectedLeaderboard].completed, person[selectedLeaderboard].startedAt)"
-            :metadata="{
-              startedAt: person[selectedLeaderboard].startedAt ? new Date(person[selectedLeaderboard].startedAt * 1000).toLocaleString() : 'Not Started',
-              finishedAt: person[selectedLeaderboard].solvedAt ? new Date(person[selectedLeaderboard].solvedAt * 1000).toLocaleString() : 'Not Completed',
-              usedAutocomplete: person[selectedLeaderboard].usedAutoComplete,
-            }"
-          />
-        </li>
-      </template>
+      <Overlays :error="{ status: error, message: errorMsg }" :loading="{ status: loading, message: 'Getting the data...' }" />
+      <RankingWidget
+        v-for="person, index in leaderboardData"
+        :key="person.name"
+        :name="person.name"
+        :place="index + 1"
+        :time="new Date(person[selectedLeaderboard].timeElapsed * 1000).toISOString().substring(14, 19)"
+        :timeDesc="getTimeDesc(person[selectedLeaderboard].completed, person[selectedLeaderboard].startedAt)"
+        :metadata="{
+          startedAt: person[selectedLeaderboard].startedAt ? new Date(person[selectedLeaderboard].startedAt * 1000).toLocaleString() : 'Not Started',
+          finishedAt: person[selectedLeaderboard].solvedAt ? new Date(person[selectedLeaderboard].solvedAt * 1000).toLocaleString() : 'Not Completed',
+          usedAutoComplete: person[selectedLeaderboard].usedAutoComplete,
+        }"
+      />
     </ul>
   </section>
 </template>
@@ -67,8 +58,10 @@
 <script>
   import { DatePicker } from 'v-calendar';
 
-  import RankingWidget from '@/components/RankingWidget.vue'
+  import RankingWidget from '@/components/RankingWidget.vue';
+  import Overlays from '@/components/Overlays.vue';
   import { LEADERBOARD_OPTIONS } from '@/utils/constants';
+  import fetcher from '@/utils/fetcher';
 
   function formatInitDate(date) {
     const year = date.toLocaleString('default', { year: 'numeric' });
@@ -78,8 +71,6 @@
     return `${year}-${month}-${day}`;
   }
 
-  // TODOS:
-  // Overall app styling with heights, etc.
   export default {
     name: 'Leaderboard',
     data() {
@@ -88,7 +79,9 @@
         leaderboardOptions: LEADERBOARD_OPTIONS,
         selectedLeaderboard: LEADERBOARD_OPTIONS[0].id,
         leaderboardData: [],
-        isLoading: false,
+        loading: false,
+        error: false,
+        errorMsg: '',
       };
     },
     created: function () {
@@ -96,15 +89,28 @@
     },
     methods: {
       fetchData: async function (date) {
-        this.isLoading = true;
-        const data = await fetch(`http://localhost:5000/leaderboard-single?date=${date}`);
-        const { leaderboard } = await data.json();
-        console.log("response data", leaderboard);
-        this.isLoading = false;
-        return this.leaderboardData = this.sortLeaderboard(leaderboard);
+        // clear existing error if present
+        if (this.errorMsg) {
+          this.errorMsg = '';
+        }
+        // TODO: better way to do this?
+        this.leaderboardData = [];
+        this.loading = true;
+        const { data, message, status } = await fetcher(`/api/leaderboard-single?date=${date}`);
+        this.loading = false;
+
+        // TODO: constants
+        if (status !== 'success') {
+          this.error = true;
+          this.errorMsg = message;
+          return this.leaderboardData = [];
+        }
+
+        return this.leaderboardData = this.sortLeaderboard(data);
       },
       sortLeaderboard: function (data) {
         const lbData = data;
+        console.log('data', lbData);
         return lbData.sort((a, b) => {
           if (a[`${this.selectedLeaderboard}`].timeElapsed === 0) return 1;
           if (b[`${this.selectedLeaderboard}`].timeElapsed === 0) return -1;
@@ -133,7 +139,7 @@
         return 'Not Started';
       },
     },
-    components: { DatePicker, RankingWidget },
+    components: { DatePicker, RankingWidget, Overlays },
 };
 </script>
 
@@ -142,10 +148,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 100%;
-
+    width: 100%;
+    flex: 1;
+    
     h2 {
-      font-size: 32px;
+      font-size: 24px;
+      text-align: center;
     }
 
     ul {
@@ -153,41 +161,47 @@
     }
 
     #date-selector-container {
+      margin-top: 24px;
+
       label {
-        position: relative;
         display: flex;
-        align-items: center;
-        margin-top: 24px;
+        flex-direction: column;
+        font-size: 14px;
 
-        #date-input {
-          padding: 8px 12px;
-          outline: 0;
-          border-radius: 8px;
-          border: 1px solid $GRAYSCALE_400;
-          margin-left: 12px;
-          line-height: 16px;
-          font-size: 16px;
-          font-family: 'Montserrat-Bold';
-        }
+        .input-container {
+          position: relative;
 
-        svg {
-          margin-left: -28px;
+          #date-input {
+            outline: 0;
+            margin-top: 8px;
+            border-radius: 8px;
+            border: 1px solid $GRAYSCALE_400;
+            line-height: 16px;
+            font-size: 14px;
+            padding: 6px 10px;
+            font-family: 'Montserrat-Bold';
+          }
+
+          svg {
+            position: absolute;
+            top: 16px;
+            right: 12px;
+          }
         }
       }
     }
 
     #leaderboard-options {
       display: flex;
+      justify-content: space-between;
       width: 100%;
-      justify-content: center;
       margin-top: 24px;
 
       .leaderboard-btn {
         outline: none;
-        margin: 0 24px; // TODO: revisit this
         text-transform: uppercase;
         font-family: 'Montserrat-Bold';
-        padding: 12px 24px;
+        padding: 8px 16px;
         border-radius: 4px;
         letter-spacing: 0.5px;
         transition: ease-in-out 0.3s;
@@ -214,31 +228,62 @@
     }
 
     #leaderboard-rankings {
-      width: 50%;
-      height: 100%;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      align-items: center;
+      flex: 1;
+    }
 
-      .loading-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
+    @media (min-width: $BREAKPOINT_SM) {
+      #leaderboard-options {
+        justify-content: space-evenly;
+      }
+    }
 
-        svg {
-          height: 32px;
-          width: 32px;
-          margin-bottom: 24px;
-          animation-name: spin;
-          animation-duration: 2000ms;
-          animation-iteration-count: infinite;
-          animation-timing-function: linear;
+    @media (min-width: $BREAKPOINT_MD) {
+      h2 {
+        font-size: 32px;
+      }
+
+      #date-selector-container {
+        label {
+          flex-direction: row;
+          align-items: center;
+          font-size: 16px;
+
+          .input-container {
+            #date-input {
+              font-size: 16px;
+              padding: 8px 12px;
+              margin-top: 0;
+              margin-left: 12px;
+            }
+
+            svg {
+              top: 10px;
+            }
+          }
+        }
+      }
+
+      #leaderboard-options {
+        .leaderboard-btn {
+          padding: 12px 24px;
         }
       }
     }
-  }
 
-  @keyframes spin {
-    from {transform:rotate(0deg);}
-    to {transform:rotate(360deg);}
+    @media (min-width: $BREAKPOINT_LG) {
+      #leaderboard-options, #leaderboard-rankings > li {
+        max-width: 75%;
+      }
+    }
+    
+    @media (min-width: $BREAKPOINT_XL) {
+      #leaderboard-options, #leaderboard-rankings > li {
+        max-width: 50%;
+      }
+    }
   }
 </style>

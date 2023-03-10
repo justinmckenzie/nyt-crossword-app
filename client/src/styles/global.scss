@@ -15,8 +15,10 @@ html, body {
   color: $PRIMARY_900;
 }
 
-body, #app {
-  height: calc(100vh - 105px); // TODO: revist this. might need to look up how to size body with fixed header
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 h1, h2, h3, h4, h5, h6 {
