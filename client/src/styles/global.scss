@@ -1,17 +1,18 @@
 @font-face {
-  font-family: 'Montserrat-Regular';
+  font-family: "Montserrat-Regular";
   font-style: normal;
-  src: url('./fonts/Montserrat-Regular.ttf') format('truetype');
+  src: url("./fonts/Montserrat-Regular.ttf") format("truetype");
 }
 
 @font-face {
-  font-family: 'Montserrat-Bold';
+  font-family: "Montserrat-Bold";
   font-style: normal;
-  src: url('./fonts/Montserrat-Bold.ttf') format('truetype');
+  src: url("./fonts/Montserrat-Bold.ttf") format("truetype");
 }
 
-html, body {
-  font-family: 'Montserrat-Regular';
+html,
+body {
+  font-family: "Montserrat-Regular";
   color: $PRIMARY_900;
 }
 
@@ -21,8 +22,13 @@ html, body {
   flex-direction: column;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Montserrat-Bold';
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Montserrat-Bold";
 }
 
 * {

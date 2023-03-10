@@ -5,12 +5,12 @@
 </template>
 
 <script>
-import Base from '@/components/Base.vue'
+import Base from "@/components/Base.vue";
 
 export default {
-  name: 'home',
+  name: "home",
   components: {
-    Base
-  }
-}
+    Base,
+  },
+};
 </script>
